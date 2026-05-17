@@ -3,333 +3,301 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تحدي الأرقام اللانهائي | Mind Guess Pro</title>
+    <title>تحدي الأرقام الجماعي | Multi-Mind Guess</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/peerjs@1.4.7/dist/peerjs.min.js"></script>
     <style>
         :root {
-            --bg-color: #0b0f1a;
-            --card-bg: #161b2e;
-            --primary: #c084fc;
-            --secondary: #22d3ee;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --primary: #a855f7;
+            --secondary: #0ea5e9;
             --accent: #f43f5e;
             --success: #10b981;
-            --text: #f1f5f9;
+            --text: #f8fafc;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .game-container {
-            background: var(--card-bg);
-            padding: 25px;
-            border-radius: 24px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-            width: 100%;
-            max-width: 450px;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        h1 { font-size: 1.8rem; margin-bottom: 5px; color: var(--primary); }
-        .sub-title { color: #94a3b8; font-size: 0.85rem; margin-bottom: 20px; }
-
+        .game-container { background: var(--card-bg); padding: 25px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); width: 100%; max-width: 500px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
+        
         .screen { display: none; }
-        .screen.active { display: block; animation: fadeIn 0.3s ease-out; }
-
-        .mode-btn {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 20px;
-            border-radius: 15px;
-            cursor: pointer;
-            transition: 0.3s;
-            margin-bottom: 15px;
-        }
-        .mode-btn:hover { background: rgba(192, 132, 252, 0.1); border-color: var(--primary); }
-
-        input {
-            width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #334155;
-            background: #0f172a; color: #fff; text-align: center; outline: none; font-size: 1.1rem;
-            margin-bottom: 10px;
-        }
-
-        button {
-            width: 100%; padding: 12px; background: var(--primary);
-            color: #fff; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.2s;
-        }
+        .screen.active { display: block; animation: fadeIn 0.3s; }
+        
+        h1 { color: var(--primary); margin-bottom: 15px; }
+        input, select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #334155; background: #0f172a; color: #fff; text-align: center; margin-bottom: 10px; font-size: 1rem; }
+        
+        button { width: 100%; padding: 12px; background: var(--primary); color: #fff; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; margin-bottom: 10px; }
         button:hover { opacity: 0.9; }
-        button:disabled { background: #475569; cursor: not-allowed; }
+        button:disabled { background: #475569; }
 
-        .room-id-display { font-size: 2.2rem; color: var(--secondary); font-weight: bold; display: block; margin: 10px 0; letter-spacing: 5px; }
+        .player-tag { background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 8px; margin: 5px; display: inline-block; font-size: 0.8rem; }
+        .current-turn-name { color: var(--secondary); font-weight: bold; font-size: 1.2rem; }
+        
+        .history { max-height: 180px; overflow-y: auto; background: rgba(0,0,0,0.3); border-radius: 15px; padding: 10px; text-align: right; margin-top: 15px; border: 1px solid #334155; }
+        .hist-item { font-size: 0.85rem; padding: 6px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .hist-name { font-weight: bold; color: var(--primary); }
 
-        .turn-box { padding: 12px; border-radius: 12px; margin-bottom: 15px; font-weight: bold; }
-        .my-turn { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid var(--success); }
-        .opp-turn { background: rgba(244, 63, 94, 0.15); color: var(--accent); border: 1px solid var(--accent); }
+        .room-badge { background: #0f172a; padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 2px dashed var(--secondary); }
+        .room-code { font-size: 2rem; color: var(--secondary); font-weight: bold; display: block; letter-spacing: 5px; }
 
-        .stats { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 0.9rem; color: #94a3b8; }
-        .counter { color: var(--secondary); font-weight: bold; }
-
-        .hint-area { min-height: 70px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); border-radius: 12px; margin-bottom: 15px; padding: 10px; border: 1px dashed #334155; }
-
-        .history { max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.2); border-radius: 12px; padding: 10px; text-align: right; }
-        .history-item { font-size: 0.85rem; padding: 5px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .hist-me { color: var(--secondary); }
-        .hist-opp { color: var(--primary); }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
 <div class="game-container">
-    <h1>🎯 Mind Guess Pro</h1>
-    <div class="sub-title">تحدي التخمين اللانهائي</div>
+    <div id="setupPlayer">
+        <h1>🎮 دخول اللعبة</h1>
+        <input type="text" id="playerNameInput" placeholder="أدخل اسمك المستعار...">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <button onclick="initPeer('host')">إنشاء غرفة</button>
+            <button onclick="showJoinScreen()">انضمام لغرفة</button>
+        </div>
+        <button onclick="startAI()" style="background: #334155;">لعب ضد الذكاء الاصطناعي</button>
+    </div>
 
-    <div id="modeScreen" class="screen active">
-        <div class="mode-btn" onclick="startAIMode()">
-            <h3>🤖 ضد الذكاء الاصطناعي</h3>
-            <p style="font-size: 0.8rem; color: #94a3b8;">تحدَّ الكمبيوتر في عدد لا محدود من المحاولات</p>
-        </div>
-        <div class="mode-btn" onclick="showLobby()">
-            <h3>🌐 أونلاين (كود 5 أرقام)</h3>
-            <p style="font-size: 0.8rem; color: #94a3b8;">العب ضد صديقك (يفوز من يحزر أولاً)</p>
-        </div>
+    <div id="joinScreen" class="screen">
+        <h2>الانضمام لصديق</h2>
+        <input type="number" id="roomCodeInput" placeholder="أدخل الكود (5 أرقام)">
+        <button onclick="initPeer('guest')">دخول الآن ⚔️</button>
+        <button onclick="location.reload()" style="background:transparent;">رجوع</button>
     </div>
 
     <div id="lobbyScreen" class="screen">
-        <div style="background: #0f172a; padding: 15px; border-radius: 15px; margin-bottom: 15px;">
-            <label style="font-size: 0.8rem;">كود غرفتك:</label>
-            <span id="myRoomId" class="room-id-display">-----</span>
-            <button onclick="copyId()" style="background: #334155; width: auto; padding: 5px 15px; font-size: 0.7rem;">نسخ الكود 📋</button>
+        <div class="room-badge">
+            <span style="font-size: 0.8rem;">كود الغرفة</span>
+            <span id="displayRoomCode" class="room-code">-----</span>
         </div>
-        <input type="number" id="joinIdInput" placeholder="أدخل كود صديقك...">
-        <button onclick="joinGame()">دخول الغرفة ⚔️</button>
-        <button onclick="location.reload()" style="background:transparent; color:#64748b; margin-top:10px;">رجوع</button>
+        <div id="playerList">
+            <p>اللاعبون المتصلون:</p>
+            <div id="connectedPlayers"></div>
+        </div>
+        <p id="lobbyStatus" style="margin: 15px 0; font-size: 0.8rem; color: #94a3b8;"></p>
+        <button id="startGameBtn" onclick="broadcastStart()" style="display:none;">ابدأ اللعبة (للأدمن فقط) 🚀</button>
     </div>
 
-    <div id="setupScreen" class="screen">
-        <div style="margin-bottom: 15px;">
-            <label id="setupLabel">اختر رقمك السري (1-100):</label>
-            <input type="password" id="secretInput" placeholder="رقمك السري">
-        </div>
-        <button id="readyBtn" onclick="confirmSecret()">أنا جاهز! 🔥</button>
-        <p id="waitingOpponent" style="font-size: 0.8rem; color: var(--secondary); margin-top: 10px; display: none;">بانتظار الخصم ليقرر...</p>
+    <div id="secretScreen" class="screen">
+        <h2>اختر رقمك السري</h2>
+        <p style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 10px;">لن يراه أحد غيرك</p>
+        <input type="password" id="mySecretInput" placeholder="رقم من 1-100">
+        <button id="confirmSecretBtn" onclick="submitSecret()">جاهز 🔥</button>
     </div>
 
     <div id="playScreen" class="screen">
-        <div id="turnDisplay" class="turn-box my-turn">دورك للتخمين</div>
-        <div class="stats">
-            <div>محاولاتك: <span id="myCount" class="counter">0</span></div>
-            <div>محاولات الخصم: <span id="oppCount" class="counter">0</span></div>
+        <div style="background: rgba(14, 165, 233, 0.1); padding: 10px; border-radius: 12px; margin-bottom: 15px;">
+            <span>الدور الآن عند: </span><span id="turnName" class="current-turn-name">---</span>
         </div>
-        <div class="hint-area" id="hintBox">خمن رقم الخصم للبدء!</div>
-        <div id="actionArea">
-            <input type="number" id="guessInput" placeholder="اكتب رقمك هنا...">
-            <button onclick="makeGuess()">إرسال التخمين 🚀</button>
+
+        <div id="myActionArea" style="display:none;">
+            <label style="font-size: 0.8rem;">اختر الخصم الذي تريد استهدافه:</label>
+            <select id="targetPlayerSelect"></select>
+            <input type="number" id="guessInput" placeholder="تخمينك (1-100)">
+            <button onclick="sendGuess()">إرسال التخمين 🚀</button>
         </div>
+
+        <div id="waitingText" style="color: #64748b; font-size: 0.9rem;">انتظر دورك...</div>
+
         <div class="history" id="gameHistory"></div>
     </div>
 
     <div id="endScreen" class="screen">
-        <h2 id="endStatus">🎉 فوز مستحق!</h2>
-        <p id="secretReveal" style="margin: 15px 0; color: #94a3b8;"></p>
-        <button id="rematchBtn" onclick="requestRematch()">طلب قيم جديد فوراً 🔄</button>
-        <div id="rematchMsg" style="font-size: 0.8rem; color: var(--success); margin-top: 10px; display: none;"></div>
-        <button onclick="location.reload()" style="background:transparent; color:#64748b; margin-top:10px;">خروج للرئيسية</button>
+        <h1 id="winnerTitle">🏆 فوز!</h1>
+        <p id="winDetail" style="margin-bottom: 20px;"></p>
+        <button onclick="location.reload()">العودة للرئيسية 🔄</button>
     </div>
 </div>
 
 <script>
-    let peer, conn;
-    let gameMode = '', mySecret = null, oppSecret = null;
-    let myTryCount = 0, oppTryCount = 0;
-    let isMyTurn = false;
-    let aiMin = 1, aiMax = 100;
-    let iRequestedRematch = false, oppRequestedRematch = false;
+    let peer, conn, connections = [];
+    let myName, myId, myRole;
+    let players = []; // {id, name, secret, ready}
+    let turnIndex = 0;
+    let isGameStarted = false;
+
+    function showJoinScreen() {
+        document.getElementById('setupPlayer').style.display = 'none';
+        switchScreen('joinScreen');
+    }
+
+    function initPeer(role) {
+        myName = document.getElementById('playerNameInput').value.trim();
+        if(!myName) return alert("اكتب اسمك أولاً");
+        
+        myRole = role;
+        let id = (role === 'host') ? Math.floor(10000 + Math.random() * 90000).toString() : null;
+        
+        peer = new Peer(id);
+
+        peer.on('open', (assignedId) => {
+            myId = assignedId;
+            if(role === 'host') {
+                document.getElementById('displayRoomCode').innerText = myId;
+                document.getElementById('startGameBtn').style.display = 'block';
+                players.push({id: myId, name: myName, secret: null, ready: false});
+                updateLobbyUI();
+                switchScreen('lobbyScreen');
+            } else {
+                const code = document.getElementById('roomCodeInput').value;
+                conn = peer.connect(code);
+                setupConnection(conn);
+            }
+        });
+
+        peer.on('connection', (incoming) => {
+            if(players.length >= 4) return incoming.close();
+            setupConnection(incoming);
+        });
+    }
+
+    function setupConnection(c) {
+        c.on('open', () => {
+            if(myRole === 'guest') {
+                c.send({type: 'JOIN', name: myName});
+                switchScreen('lobbyScreen');
+            }
+        });
+
+        c.on('data', (data) => {
+            if(data.type === 'JOIN' && myRole === 'host') {
+                players.push({id: c.peer, name: data.name, secret: null, ready: false});
+                connections.push(c);
+                broadcast({type: 'PLAYER_LIST', list: players});
+                updateLobbyUI();
+            }
+            if(data.type === 'PLAYER_LIST') {
+                players = data.list;
+                updateLobbyUI();
+            }
+            if(data.type === 'START_GAME') {
+                switchScreen('secretScreen');
+            }
+            if(data.type === 'SECRET_READY') {
+                let p = players.find(x => x.id === data.from);
+                p.secret = data.secret;
+                p.ready = true;
+                if(myRole === 'host') checkAllReady();
+            }
+            if(data.type === 'GUESS_EVENT') {
+                handleGuessEvent(data);
+            }
+            if(data.type === 'WINNER') {
+                showWinner(data);
+            }
+        });
+    }
+
+    function broadcast(data) {
+        connections.forEach(c => c.send(data));
+    }
+
+    function updateLobbyUI() {
+        const container = document.getElementById('connectedPlayers');
+        container.innerHTML = players.map(p => `<span class="player-tag">👤 ${p.name}</span>`).join('');
+        document.getElementById('lobbyStatus').innerText = `عدد اللاعبين: ${players.length} / 4`;
+    }
+
+    function broadcastStart() {
+        if(players.length < 2) return alert("تحتاج لاعب واحد على الأقل للمنافسة");
+        broadcast({type: 'START_GAME'});
+        switchScreen('secretScreen');
+    }
+
+    function submitSecret() {
+        const secret = parseInt(document.getElementById('mySecretInput').value);
+        if(!secret || secret < 1 || secret > 100) return alert("رقم بين 1-100");
+        
+        document.getElementById('confirmSecretBtn').disabled = true;
+        document.getElementById('confirmSecretBtn').innerText = "بانتظار البقية...";
+
+        if(myRole === 'host') {
+            let p = players.find(x => x.id === myId);
+            p.secret = secret; p.ready = true;
+            checkAllReady();
+        } else {
+            conn.send({type: 'SECRET_READY', from: myId, secret: secret});
+        }
+    }
+
+    function checkAllReady() {
+        if(players.every(p => p.ready)) {
+            const firstTurnId = players[0].id;
+            broadcast({type: 'GUESS_EVENT', nextTurn: turnIndex, players: players});
+            handleGuessEvent({nextTurn: 0});
+        }
+    }
+
+    function handleGuessEvent(data) {
+        if(data.players) players = data.players;
+        turnIndex = data.nextTurn;
+        const currentPlayer = players[turnIndex];
+        
+        switchScreen('playScreen');
+        document.getElementById('turnName').innerText = currentPlayer.name;
+
+        // تحديث قائمة الأهداف (كل اللاعبين ما عدا أنا)
+        const targetSelect = document.getElementById('targetPlayerSelect');
+        targetSelect.innerHTML = players
+            .filter(p => p.id !== myId)
+            .map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+
+        if(currentPlayer.id === myId) {
+            document.getElementById('myActionArea').style.display = 'block';
+            document.getElementById('waitingText').style.display = 'none';
+        } else {
+            document.getElementById('myActionArea').style.display = 'none';
+            document.getElementById('waitingText').style.display = 'block';
+        }
+
+        if(data.log) {
+            const logDiv = document.getElementById('gameHistory');
+            logDiv.innerHTML = `<div class="hist-item">${data.log}</div>` + logDiv.innerHTML;
+        }
+    }
+
+    function sendGuess() {
+        const val = parseInt(document.getElementById('guessInput').value);
+        const targetId = document.getElementById('targetPlayerSelect').value;
+        const targetName = players.find(p => p.id === targetId).name;
+        
+        if(!val) return;
+        document.getElementById('guessInput').value = '';
+
+        const targetSecret = players.find(p => p.id === targetId).secret;
+        let hint = "";
+        
+        if(val === targetSecret) {
+            const winData = {type: 'WINNER', winnerName: myName, targetName: targetName, secret: val};
+            if(myRole === 'host') { broadcast(winData); showWinner(winData); }
+            else conn.send(winData);
+            return;
+        }
+
+        hint = (val > targetSecret) ? `رقم ${targetName} أصغر من ${val} ⬇️` : `رقم ${targetName} أكبر من ${val} ⬆️`;
+        const logMsg = `<span class="hist-name">${myName}</span> خمن رقم ${targetName}: ${val} <br> <small>${hint}</small>`;
+
+        let nextIdx = (turnIndex + 1) % players.length;
+        
+        const eventData = {type: 'GUESS_EVENT', nextTurn: nextIdx, log: logMsg};
+        if(myRole === 'host') { broadcast(eventData); handleGuessEvent(eventData); }
+        else conn.send(eventData);
+    }
+
+    function showWinner(data) {
+        switchScreen('endScreen');
+        document.getElementById('winnerTitle').innerText = `🏆 الفائز: ${data.winnerName}`;
+        document.getElementById('winDetail').innerText = `لقد استطاع حزر رقم ${data.targetName} بنجاح وهو (${data.secret})`;
+    }
 
     function switchScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
     }
 
-    // --- وضع AI ---
-    function startAIMode() {
-        gameMode = 'AI';
-        oppSecret = Math.floor(Math.random() * 100) + 1;
-        switchScreen('setupScreen');
-    }
-
-    // --- وضع Online ---
-    function showLobby() {
-        gameMode = 'ONLINE';
-        const shortId = Math.floor(10000 + Math.random() * 90000).toString();
-        peer = new Peer(shortId);
-        peer.on('open', (id) => { document.getElementById('myRoomId').innerText = id; switchScreen('lobbyScreen'); });
-        peer.on('connection', (c) => { conn = c; isMyTurn = true; setupOnlineEvents(); });
-        peer.on('error', () => showLobby());
-    }
-
-    function joinGame() {
-        const id = document.getElementById('joinIdInput').value;
-        if(id.length !== 5) return alert('الرمز 5 أرقام');
-        conn = peer.connect(id);
-        isMyTurn = false;
-        setupOnlineEvents();
-    }
-
-    function setupOnlineEvents() {
-        conn.on('open', () => { switchScreen('setupScreen'); });
-        conn.on('data', (data) => handleData(data));
-        conn.on('close', () => { alert('الخصم غادر'); location.reload(); });
-    }
-
-    function handleData(data) {
-        if(data.type === 'READY') {
-            oppSecret = data.secret;
-            if(mySecret) startGame();
-        } else if(data.type === 'GUESS') {
-            processGuess(data.val, 'opp');
-            isMyTurn = true;
-            updateUI();
-        } else if(data.type === 'REMATCH') {
-            oppRequestedRematch = true;
-            if(iRequestedRematch) resetGameForNewRound();
-            else {
-                document.getElementById('rematchMsg').style.display = 'block';
-                document.getElementById('rematchMsg').innerText = 'الخصم يريد تحدي آخر!';
-            }
-        }
-    }
-
-    // --- منطق اللعبة ---
-    function confirmSecret() {
-        const val = parseInt(document.getElementById('secretInput').value);
-        if(!val || val < 1 || val > 100) return alert('أدخل رقم بين 1-100');
-        mySecret = val;
-        document.getElementById('readyBtn').disabled = true;
-        document.getElementById('waitingOpponent').style.display = 'block';
-
-        if(gameMode === 'ONLINE') {
-            conn.send({ type: 'READY', secret: mySecret });
-            if(oppSecret) startGame();
-        } else startGame();
-    }
-
-    function startGame() {
-        switchScreen('playScreen');
-        updateUI();
-        if(!isMyTurn && gameMode === 'AI') setTimeout(aiTurn, 1000);
-    }
-
-    function makeGuess() {
-        if(!isMyTurn) return;
-        const val = parseInt(document.getElementById('guessInput').value);
-        if(!val) return;
-        document.getElementById('guessInput').value = '';
-        processGuess(val, 'me');
-        if(gameMode === 'ONLINE') conn.send({ type: 'GUESS', val: val });
-        else if(gameMode === 'AI') {
-            isMyTurn = false;
-            updateUI();
-            setTimeout(aiTurn, 1500);
-        }
-    }
-
-    function aiTurn() {
-        let aiGuess = Math.floor((aiMin + aiMax) / 2);
-        processGuess(aiGuess, 'opp');
-        isMyTurn = true;
-        updateUI();
-    }
-
-    function processGuess(val, shooter) {
-        const target = (shooter === 'me') ? oppSecret : mySecret;
-        let hint = '';
-        let status = '';
-
-        if(shooter === 'me') myTryCount++; else oppTryCount++;
-
-        if(val === target) {
-            endGame(shooter === 'me' ? 'WIN' : 'LOSE');
-            return;
-        }
-
-        if(val > target) {
-            hint = `رقم الخصم أصغر من ${val} ⬇️`;
-            status = 'أصغر ⬇️';
-            if(shooter === 'opp') aiMax = val - 1;
-        } else {
-            hint = `رقم الخصم أكبر من ${val} ⬆️`;
-            status = 'أكبر ⬆️';
-            if(shooter === 'opp') aiMin = val + 1;
-        }
-
-        document.getElementById('hintBox').innerText = hint;
-        addToHistory(shooter, val, status);
-        updateUI();
-    }
-
-    function addToHistory(who, val, status) {
-        const log = document.getElementById('gameHistory');
-        const item = document.createElement('div');
-        item.className = 'history-item ' + (who === 'me' ? 'hist-me' : 'hist-opp');
-        item.innerText = (who === 'me' ? 'أنت خمنت: ' : 'الخصم خمن: ') + val + ' (' + status + ')';
-        log.prepend(item);
-    }
-
-    function updateUI() {
-        document.getElementById('myCount').innerText = myTryCount;
-        document.getElementById('oppCount').innerText = oppTryCount;
-        const box = document.getElementById('turnDisplay');
-        if(isMyTurn) { box.innerText = "دورك للتخمين 🎯"; box.className = "turn-box my-turn"; }
-        else { box.innerText = "انتظر الخصم... ⏳"; box.className = "turn-box opp-turn"; }
-    }
-
-    function endGame(res) {
-        switchScreen('endScreen');
-        const st = document.getElementById('endStatus');
-        st.innerText = (res === 'WIN') ? "🏆 فزت! أنت عبقري" : "💀 الخصم حزر رقمك السري!";
-        document.getElementById('secretReveal').innerText = `رقمك: ${mySecret} | رقم الخصم: ${oppSecret} \n محاولاتك: ${myTryCount} | محاولات الخصم: ${oppTryCount}`;
-    }
-
-    function requestRematch() {
-        iRequestedRematch = true;
-        document.getElementById('rematchBtn').disabled = true;
-        document.getElementById('rematchMsg').style.display = 'block';
-        document.getElementById('rematchMsg').innerText = 'تم إرسال طلبك للخصم...';
-        if(gameMode === 'ONLINE') conn.send({ type: 'REMATCH' });
-        if(gameMode === 'AI' || oppRequestedRematch) resetGameForNewRound();
-    }
-
-    function resetGameForNewRound() {
-        mySecret = null; oppSecret = (gameMode === 'AI' ? Math.floor(Math.random() * 100) + 1 : null);
-        myTryCount = 0; oppTryCount = 0;
-        aiMin = 1; aiMax = 100;
-        iRequestedRematch = false; oppRequestedRematch = false;
-        
-        document.getElementById('secretInput').value = '';
-        document.getElementById('readyBtn').disabled = false;
-        document.getElementById('waitingOpponent').style.display = 'none';
-        document.getElementById('gameHistory').innerHTML = '';
-        document.getElementById('hintBox').innerText = 'خمن رقم الخصم للبدء!';
-        document.getElementById('rematchMsg').style.display = 'none';
-        document.getElementById('rematchBtn').disabled = false;
-        switchScreen('setupScreen');
-    }
-
-    function copyId() {
-        navigator.clipboard.writeText(document.getElementById('myRoomId').innerText);
-        alert('تم نسخ الكود!');
+    function startAI() {
+        alert("وضع الـ AI حالياً يدعم لاعب ضد لاعب فقط، سيتم تحويلك للنسخة السابقة");
+        location.reload(); 
     }
 </script>
 </body>
