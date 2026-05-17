@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تحدي الأرقام Pro | أونلاين & ذكاء اصطناعي</title>
+    <title>تحدي الأرقام اللانهائي | Mind Guess Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/peerjs@1.4.7/dist/peerjs.min.js"></script>
     <style>
@@ -46,7 +46,6 @@
         .screen { display: none; }
         .screen.active { display: block; animation: fadeIn 0.3s ease-out; }
 
-        .mode-selection { display: grid; gap: 15px; }
         .mode-btn {
             background: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.1);
@@ -54,35 +53,38 @@
             border-radius: 15px;
             cursor: pointer;
             transition: 0.3s;
+            margin-bottom: 15px;
         }
         .mode-btn:hover { background: rgba(192, 132, 252, 0.1); border-color: var(--primary); }
 
-        .input-group { margin-bottom: 15px; text-align: right; }
-        label { display: block; margin-bottom: 5px; font-size: 0.9rem; color: #cbd5e1; }
         input {
             width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #334155;
             background: #0f172a; color: #fff; text-align: center; outline: none; font-size: 1.1rem;
+            margin-bottom: 10px;
         }
 
         button {
             width: 100%; padding: 12px; background: var(--primary);
             color: #fff; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.2s;
         }
-        button:hover { opacity: 0.9; transform: translateY(-1px); }
+        button:hover { opacity: 0.9; }
+        button:disabled { background: #475569; cursor: not-allowed; }
 
-        .room-info { background: #0f172a; padding: 15px; border-radius: 15px; margin-bottom: 15px; }
-        .room-id-display { font-size: 2rem; color: var(--secondary); font-weight: bold; display: block; margin: 5px 0; }
+        .room-id-display { font-size: 2.2rem; color: var(--secondary); font-weight: bold; display: block; margin: 10px 0; letter-spacing: 5px; }
 
-        .turn-box { padding: 10px; border-radius: 10px; margin-bottom: 15px; font-weight: bold; border: 1px solid transparent; }
-        .my-turn { background: rgba(16, 185, 129, 0.1); border-color: var(--success); color: var(--success); }
-        .opp-turn { background: rgba(244, 63, 94, 0.1); border-color: var(--accent); color: var(--accent); }
+        .turn-box { padding: 12px; border-radius: 12px; margin-bottom: 15px; font-weight: bold; }
+        .my-turn { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid var(--success); }
+        .opp-turn { background: rgba(244, 63, 94, 0.15); color: var(--accent); border: 1px solid var(--accent); }
 
-        .stats { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 0.85rem; }
-        .hearts { color: var(--accent); letter-spacing: 2px; }
+        .stats { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 0.9rem; color: #94a3b8; }
+        .counter { color: var(--secondary); font-weight: bold; }
 
-        .hint-area { min-height: 60px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.03); border-radius: 12px; margin-bottom: 15px; font-size: 0.95rem; padding: 10px; }
+        .hint-area { min-height: 70px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); border-radius: 12px; margin-bottom: 15px; padding: 10px; border: 1px dashed #334155; }
 
-        .history { max-height: 80px; overflow-y: auto; font-size: 0.8rem; background: rgba(0,0,0,0.2); border-radius: 10px; padding: 8px; text-align: right; }
+        .history { max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.2); border-radius: 12px; padding: 10px; text-align: right; }
+        .history-item { font-size: 0.85rem; padding: 5px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .hist-me { color: var(--secondary); }
+        .hist-opp { color: var(--primary); }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
@@ -90,146 +92,137 @@
 <body>
 
 <div class="game-container">
-    <div id="mainTitle">
-        <h1>🎯 Mind Guess Pro</h1>
-        <div class="sub-title" id="statusText">اختر وضع اللعب للبدء</div>
-    </div>
+    <h1>🎯 Mind Guess Pro</h1>
+    <div class="sub-title">تحدي التخمين اللانهائي</div>
 
     <div id="modeScreen" class="screen active">
-        <div class="mode-selection">
-            <div class="mode-btn" onclick="startAIMode()">
-                <h3>🤖 ضد الذكاء الاصطناعي</h3>
-                <p style="font-size: 0.8rem; color: #94a3b8;">تحدَّ الكمبيوتر في نمط المحترفين</p>
-            </div>
-            <div class="mode-btn" onclick="showLobby()">
-                <h3>🌐 أونلاين (5 أرقام)</h3>
-                <p style="font-size: 0.8rem; color: #94a3b8;">العب ضد صديقك عن بعد</p>
-            </div>
+        <div class="mode-btn" onclick="startAIMode()">
+            <h3>🤖 ضد الذكاء الاصطناعي</h3>
+            <p style="font-size: 0.8rem; color: #94a3b8;">تحدَّ الكمبيوتر في عدد لا محدود من المحاولات</p>
+        </div>
+        <div class="mode-btn" onclick="showLobby()">
+            <h3>🌐 أونلاين (كود 5 أرقام)</h3>
+            <p style="font-size: 0.8rem; color: #94a3b8;">العب ضد صديقك (يفوز من يحزر أولاً)</p>
         </div>
     </div>
 
     <div id="lobbyScreen" class="screen">
-        <div class="room-info">
-            <label>رمز غرفتك:</label>
+        <div style="background: #0f172a; padding: 15px; border-radius: 15px; margin-bottom: 15px;">
+            <label style="font-size: 0.8rem;">كود غرفتك:</label>
             <span id="myRoomId" class="room-id-display">-----</span>
-            <button onclick="copyId()" style="background: #334155; font-size: 0.7rem; width: auto; padding: 5px 10px;">نسخ 📋</button>
+            <button onclick="copyId()" style="background: #334155; width: auto; padding: 5px 15px; font-size: 0.7rem;">نسخ الكود 📋</button>
         </div>
-        <div class="input-group">
-            <label>انضم لغرفة صديقك (5 أرقام):</label>
-            <input type="number" id="joinIdInput" placeholder="أدخل الرمز هنا...">
-        </div>
-        <button onclick="joinGame()">انضم الآن ⚔️</button>
-        <button onclick="backToMain()" style="margin-top: 10px; background: transparent; color: #94a3b8;">رجوع</button>
+        <input type="number" id="joinIdInput" placeholder="أدخل كود صديقك...">
+        <button onclick="joinGame()">دخول الغرفة ⚔️</button>
+        <button onclick="location.reload()" style="background:transparent; color:#64748b; margin-top:10px;">رجوع</button>
     </div>
 
     <div id="setupScreen" class="screen">
-        <div class="input-group">
-            <label id="setupLabel">أدخل رقمك السري (1-100):</label>
-            <input type="password" id="secretInput" placeholder="لن يراه الخصم">
+        <div style="margin-bottom: 15px;">
+            <label id="setupLabel">اختر رقمك السري (1-100):</label>
+            <input type="password" id="secretInput" placeholder="رقمك السري">
         </div>
-        <button onclick="confirmSecret()">جاهز! 🔥</button>
+        <button id="readyBtn" onclick="confirmSecret()">أنا جاهز! 🔥</button>
+        <p id="waitingOpponent" style="font-size: 0.8rem; color: var(--secondary); margin-top: 10px; display: none;">بانتظار الخصم ليقرر...</p>
     </div>
 
     <div id="playScreen" class="screen">
         <div id="turnDisplay" class="turn-box my-turn">دورك للتخمين</div>
         <div class="stats">
-            <div>أنت: <span id="myLives" class="hearts">❤️❤️❤️❤️❤️</span></div>
-            <div>الخصم: <span id="oppLives" class="hearts">❤️❤️❤️❤️❤️</span></div>
+            <div>محاولاتك: <span id="myCount" class="counter">0</span></div>
+            <div>محاولات الخصم: <span id="oppCount" class="counter">0</span></div>
         </div>
-        <div class="hint-area" id="hintBox">ابدأ التخمين!</div>
+        <div class="hint-area" id="hintBox">خمن رقم الخصم للبدء!</div>
         <div id="actionArea">
-            <input type="number" id="guessInput" placeholder="رقم من 1-100" style="margin-bottom: 10px;">
+            <input type="number" id="guessInput" placeholder="اكتب رقمك هنا...">
             <button onclick="makeGuess()">إرسال التخمين 🚀</button>
         </div>
         <div class="history" id="gameHistory"></div>
     </div>
 
     <div id="endScreen" class="screen">
-        <h2 id="endStatus" style="margin-bottom: 10px;">🎉 فزت!</h2>
-        <p id="secretReveal" style="margin-bottom: 20px; font-size: 0.9rem;"></p>
-        <button onclick="location.reload()">لعب مرة أخرى 🔄</button>
+        <h2 id="endStatus">🎉 فوز مستحق!</h2>
+        <p id="secretReveal" style="margin: 15px 0; color: #94a3b8;"></p>
+        <button id="rematchBtn" onclick="requestRematch()">طلب قيم جديد فوراً 🔄</button>
+        <div id="rematchMsg" style="font-size: 0.8rem; color: var(--success); margin-top: 10px; display: none;"></div>
+        <button onclick="location.reload()" style="background:transparent; color:#64748b; margin-top:10px;">خروج للرئيسية</button>
     </div>
 </div>
 
 <script>
     let peer, conn;
-    let gameMode = ''; // 'AI' or 'ONLINE'
-    let mySecret, oppSecret;
-    let myLives = 5, oppLives = 5;
+    let gameMode = '', mySecret = null, oppSecret = null;
+    let myTryCount = 0, oppTryCount = 0;
     let isMyTurn = false;
     let aiMin = 1, aiMax = 100;
+    let iRequestedRematch = false, oppRequestedRematch = false;
 
-    // --- إدارة الشاشات ---
     function switchScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
     }
 
-    function backToMain() { switchScreen('modeScreen'); }
-
-    // --- وضع الذكاء الاصطناعي (AI Mode) ---
+    // --- وضع AI ---
     function startAIMode() {
         gameMode = 'AI';
         oppSecret = Math.floor(Math.random() * 100) + 1;
         switchScreen('setupScreen');
-        document.getElementById('statusText').innerText = 'تلعب ضد AI محترف';
     }
 
-    // --- وضع الأونلاين (Online Mode) ---
+    // --- وضع Online ---
     function showLobby() {
         gameMode = 'ONLINE';
         const shortId = Math.floor(10000 + Math.random() * 90000).toString();
         peer = new Peer(shortId);
-        
-        peer.on('open', (id) => {
-            document.getElementById('myRoomId').innerText = id;
-            switchScreen('lobbyScreen');
-        });
-
-        peer.on('connection', (c) => {
-            conn = c;
-            isMyTurn = true; // المستضيف يبدأ
-            setupOnlineEvents();
-        });
-
-        peer.on('error', (err) => {
-            if(err.type === 'unavailable-id') {
-                showLobby(); // إعادة المحاولة لو الرقم محجوز
-            } else {
-                alert('خطأ في الاتصال: ' + err.type);
-            }
-        });
+        peer.on('open', (id) => { document.getElementById('myRoomId').innerText = id; switchScreen('lobbyScreen'); });
+        peer.on('connection', (c) => { conn = c; isMyTurn = true; setupOnlineEvents(); });
+        peer.on('error', () => showLobby());
     }
 
     function joinGame() {
         const id = document.getElementById('joinIdInput').value;
-        if(id.length !== 5) return alert('الرمز يجب أن يكون 5 أرقام');
+        if(id.length !== 5) return alert('الرمز 5 أرقام');
         conn = peer.connect(id);
         isMyTurn = false;
         setupOnlineEvents();
     }
 
     function setupOnlineEvents() {
-        conn.on('open', () => {
-            switchScreen('setupScreen');
-            document.getElementById('statusText').innerText = 'تم الاتصال بالخصم';
-        });
+        conn.on('open', () => { switchScreen('setupScreen'); });
         conn.on('data', (data) => handleData(data));
+        conn.on('close', () => { alert('الخصم غادر'); location.reload(); });
     }
 
-    // --- منطق اللعبة العام ---
+    function handleData(data) {
+        if(data.type === 'READY') {
+            oppSecret = data.secret;
+            if(mySecret) startGame();
+        } else if(data.type === 'GUESS') {
+            processGuess(data.val, 'opp');
+            isMyTurn = true;
+            updateUI();
+        } else if(data.type === 'REMATCH') {
+            oppRequestedRematch = true;
+            if(iRequestedRematch) resetGameForNewRound();
+            else {
+                document.getElementById('rematchMsg').style.display = 'block';
+                document.getElementById('rematchMsg').innerText = 'الخصم يريد تحدي آخر!';
+            }
+        }
+    }
+
+    // --- منطق اللعبة ---
     function confirmSecret() {
         const val = parseInt(document.getElementById('secretInput').value);
         if(!val || val < 1 || val > 100) return alert('أدخل رقم بين 1-100');
         mySecret = val;
+        document.getElementById('readyBtn').disabled = true;
+        document.getElementById('waitingOpponent').style.display = 'block';
 
         if(gameMode === 'ONLINE') {
             conn.send({ type: 'READY', secret: mySecret });
-            document.getElementById('setupLabel').innerText = 'بانتظار رقم الخصم...';
             if(oppSecret) startGame();
-        } else {
-            startGame();
-        }
+        } else startGame();
     }
 
     function startGame() {
@@ -243,12 +236,9 @@
         const val = parseInt(document.getElementById('guessInput').value);
         if(!val) return;
         document.getElementById('guessInput').value = '';
-
         processGuess(val, 'me');
-        
-        if(gameMode === 'ONLINE') {
-            conn.send({ type: 'GUESS', val: val });
-        } else if(gameMode === 'AI' && oppLives > 0) {
+        if(gameMode === 'ONLINE') conn.send({ type: 'GUESS', val: val });
+        else if(gameMode === 'AI') {
             isMyTurn = false;
             updateUI();
             setTimeout(aiTurn, 1500);
@@ -256,12 +246,7 @@
     }
 
     function aiTurn() {
-        // خوارزمية البحث الثنائي (المحترف)
         let aiGuess = Math.floor((aiMin + aiMax) / 2);
-        
-        // إضافة لمسة ذكاء: أحياناً يخطئ قليلاً ليكون بشرياً لكنه يظل محترفاً
-        if(Math.random() > 0.9) aiGuess += 1; 
-
         processGuess(aiGuess, 'opp');
         isMyTurn = true;
         updateUI();
@@ -269,8 +254,10 @@
 
     function processGuess(val, shooter) {
         const target = (shooter === 'me') ? oppSecret : mySecret;
-        const hintBox = document.getElementById('hintBox');
-        let result = '';
+        let hint = '';
+        let status = '';
+
+        if(shooter === 'me') myTryCount++; else oppTryCount++;
 
         if(val === target) {
             endGame(shooter === 'me' ? 'WIN' : 'LOSE');
@@ -278,76 +265,73 @@
         }
 
         if(val > target) {
-            result = `الرقم ${val} أعلى ⬆️ من المطلوب`;
+            hint = `رقم الخصم أصغر من ${val} ⬇️`;
+            status = 'أصغر ⬇️';
             if(shooter === 'opp') aiMax = val - 1;
         } else {
-            result = `الرقم ${val} أقل ⬇️ من المطلوب`;
+            hint = `رقم الخصم أكبر من ${val} ⬆️`;
+            status = 'أكبر ⬆️';
             if(shooter === 'opp') aiMin = val + 1;
         }
 
-        hintBox.innerText = result;
-        
-        if(shooter === 'me') {
-            oppLives--;
-            if(oppLives <= 0) endGame('LOSE_LIVES');
-        } else {
-            myLives--;
-            if(myLives <= 0) endGame('LOSE_LIVES_ME');
-        }
-
-        if(gameMode === 'ONLINE' && shooter === 'me') isMyTurn = false;
-        
-        addToHistory(shooter, val, result);
+        document.getElementById('hintBox').innerText = hint;
+        addToHistory(shooter, val, status);
         updateUI();
     }
 
-    function handleData(data) {
-        if(data.type === 'READY') {
-            oppSecret = data.secret;
-            if(mySecret) startGame();
-        } else if(data.type === 'GUESS') {
-            processGuess(data.val, 'opp');
-            isMyTurn = true;
-            updateUI();
-        }
+    function addToHistory(who, val, status) {
+        const log = document.getElementById('gameHistory');
+        const item = document.createElement('div');
+        item.className = 'history-item ' + (who === 'me' ? 'hist-me' : 'hist-opp');
+        item.innerText = (who === 'me' ? 'أنت خمنت: ' : 'الخصم خمن: ') + val + ' (' + status + ')';
+        log.prepend(item);
     }
 
     function updateUI() {
-        document.getElementById('myLives').innerText = "❤️".repeat(myLives) || "💀";
-        document.getElementById('oppLives').innerText = "❤️".repeat(oppLives) || "💀";
-        const turnDisplay = document.getElementById('turnDisplay');
-        
-        if(isMyTurn) {
-            turnDisplay.innerText = "دورك الآن 🎯";
-            turnDisplay.className = "turn-box my-turn";
-        } else {
-            turnDisplay.innerText = "انتظر الخصم... ⏳";
-            turnDisplay.className = "turn-box opp-turn";
-        }
+        document.getElementById('myCount').innerText = myTryCount;
+        document.getElementById('oppCount').innerText = oppTryCount;
+        const box = document.getElementById('turnDisplay');
+        if(isMyTurn) { box.innerText = "دورك للتخمين 🎯"; box.className = "turn-box my-turn"; }
+        else { box.innerText = "انتظر الخصم... ⏳"; box.className = "turn-box opp-turn"; }
     }
 
-    function addToHistory(who, val, res) {
-        const log = document.getElementById('gameHistory');
-        const entry = document.createElement('div');
-        entry.innerText = (who === 'me' ? 'أنت: ' : 'الخصم: ') + val;
-        log.prepend(entry);
-    }
-
-    function endGame(status) {
+    function endGame(res) {
         switchScreen('endScreen');
         const st = document.getElementById('endStatus');
-        if(status === 'WIN') st.innerText = "🏆 فزت! حزرت الرقم صح";
-        else if(status === 'LOSE_LIVES') st.innerText = "🏆 فزت! الخصم خلصت محاولاته";
-        else if(status === 'LOSE_LIVES_ME') st.innerText = "💀 خسرت! خلصت محاولاتك";
-        else st.innerText = "💀 خسرت! الخصم حزر رقمك";
+        st.innerText = (res === 'WIN') ? "🏆 فزت! أنت عبقري" : "💀 الخصم حزر رقمك السري!";
+        document.getElementById('secretReveal').innerText = `رقمك: ${mySecret} | رقم الخصم: ${oppSecret} \n محاولاتك: ${myTryCount} | محاولات الخصم: ${oppTryCount}`;
+    }
+
+    function requestRematch() {
+        iRequestedRematch = true;
+        document.getElementById('rematchBtn').disabled = true;
+        document.getElementById('rematchMsg').style.display = 'block';
+        document.getElementById('rematchMsg').innerText = 'تم إرسال طلبك للخصم...';
+        if(gameMode === 'ONLINE') conn.send({ type: 'REMATCH' });
+        if(gameMode === 'AI' || oppRequestedRematch) resetGameForNewRound();
+    }
+
+    function resetGameForNewRound() {
+        mySecret = null; oppSecret = (gameMode === 'AI' ? Math.floor(Math.random() * 100) + 1 : null);
+        myTryCount = 0; oppTryCount = 0;
+        aiMin = 1; aiMax = 100;
+        iRequestedRematch = false; oppRequestedRematch = false;
         
-        document.getElementById('secretReveal').innerText = `رقمك: ${mySecret} | رقم الخصم: ${oppSecret}`;
+        document.getElementById('secretInput').value = '';
+        document.getElementById('readyBtn').disabled = false;
+        document.getElementById('waitingOpponent').style.display = 'none';
+        document.getElementById('gameHistory').innerHTML = '';
+        document.getElementById('hintBox').innerText = 'خمن رقم الخصم للبدء!';
+        document.getElementById('rematchMsg').style.display = 'none';
+        document.getElementById('rematchBtn').disabled = false;
+        switchScreen('setupScreen');
     }
 
     function copyId() {
         navigator.clipboard.writeText(document.getElementById('myRoomId').innerText);
-        alert('تم نسخ الرمز!');
+        alert('تم نسخ الكود!');
     }
 </script>
 </body>
 </html>
+
